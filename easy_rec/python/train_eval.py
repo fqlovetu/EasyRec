@@ -4,9 +4,14 @@ import argparse
 import json
 import logging
 import os
+py_root_dir_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+print(f"py_root_dir_path:{py_root_dir_path}")
+import sys
+sys.path.append(py_root_dir_path)
 import warnings
 
 import tensorflow as tf
+
 
 from easy_rec.python.main import _train_and_evaluate_impl
 from easy_rec.python.protos.pipeline_pb2 import EasyRecConfig
