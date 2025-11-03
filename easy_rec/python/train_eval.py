@@ -79,17 +79,20 @@ def change_pipeline_config(pipeline_config: EasyRecConfig):
     # print("****"*10)
     vocab_file = data.vocab_list
     if vocab_file:
-      vocab_file_new = get_file_path_list(vocab_file.pop())[0]
+      vocab_file_new = get_file_path_list(f"{data_root_path}/{vocab_file.pop()}")[0]
       # print(vocab_file_new)
       vocab_list = get_vocab_list(vocab_file_new)
       for vocab in vocab_list:
         data.vocab_list.append(vocab)
 
-  train_input_path = pipeline_config.train_input_path
+  model_dir = pipeline_config.model_dir
+  pipeline_config.model_dir = f"{data_root_path}/{model_dir}"
+
+  train_input_path = f"{data_root_path}/{pipeline_config.train_input_path}"
   train_input_path_new = get_file_path_list(train_input_path)
   pipeline_config.train_input_path = ','.join(train_input_path_new)
 
-  eval_input_path = pipeline_config.eval_input_path
+  eval_input_path = f"{data_root_path}/{pipeline_config.eval_input_path}"
   eval_input_path_new = get_file_path_list(eval_input_path)
   pipeline_config.eval_input_path = ','.join(eval_input_path_new)
 
@@ -113,6 +116,12 @@ if __name__ == '__main__':
       # default="/Users/chensheng/PycharmProjects/EasyRec/samples/model_config/deepfm_on_criteo_tfrecord.config",
       default='/Users/chensheng/PycharmProjects/EasyRec/samples/model_config/custom_model.config',
       help='Path to pipeline config file.')
+
+  parser.add_argument(
+      '--data_root_path',
+      type = str,
+      default= '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data'
+  )
 
   parser.add_argument(
       '--train_sample_cnt',
@@ -211,6 +220,7 @@ if __name__ == '__main__':
   parser.add_argument('--gpu', type=str, default=None, help='gpu id')
   args, extra_args = parser.parse_known_args()
 
+  data_root_path = args.data_root_path
   train_sample_cnt = args.train_sample_cnt
   batch_size = args.batch_size
   num_epochs = args.num_epochs
@@ -294,6 +304,8 @@ if __name__ == '__main__':
           has_evaluator=False)
     else:
 
+      change_pipeline_config(pipeline_config)
+
       if args.continue_train:
         pass
       else:
@@ -301,7 +313,7 @@ if __name__ == '__main__':
         print(f'model_dir:{model_dir}')
         os.system(f'rm -rf {model_dir}')
 
-      change_pipeline_config(pipeline_config)
+
       config_util.auto_expand_share_feature_configs(pipeline_config)
       _train_and_evaluate_impl(
           pipeline_config,
