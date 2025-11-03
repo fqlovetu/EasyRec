@@ -29,7 +29,7 @@ pai_jobs/easy_rec*.tar.gz
 .idea
 
 # unit test
-/data
+#/data
 /UNIT_TEST_CASE_LIST
 
 
