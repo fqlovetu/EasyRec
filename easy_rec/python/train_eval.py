@@ -4,14 +4,10 @@ import argparse
 import json
 import logging
 import os
-py_root_dir_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-print(f"py_root_dir_path:{py_root_dir_path}")
 import sys
-sys.path.append(py_root_dir_path)
 import warnings
 
 import tensorflow as tf
-
 
 from easy_rec.python.main import _train_and_evaluate_impl
 from easy_rec.python.protos.pipeline_pb2 import EasyRecConfig
@@ -24,6 +20,11 @@ from easy_rec.python.utils import hpo_util
 from easy_rec.python.utils.config_util import process_neg_sampler_data_path
 from easy_rec.python.utils.config_util import set_eval_input_path
 from easy_rec.python.utils.config_util import set_train_input_path
+
+py_root_dir_path = os.path.abspath(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+print(f'py_root_dir_path:{py_root_dir_path}')
+sys.path.append(py_root_dir_path)
 
 logging.basicConfig(level=logging.INFO)
 warnings.filterwarnings('ignore')
@@ -79,20 +80,21 @@ def change_pipeline_config(pipeline_config: EasyRecConfig):
     # print("****"*10)
     vocab_file = data.vocab_list
     if vocab_file:
-      vocab_file_new = get_file_path_list(f"{data_root_path}/{vocab_file.pop()}")[0]
+      vocab_file_new = get_file_path_list(
+          f'{data_root_path}/{vocab_file.pop()}')[0]
       # print(vocab_file_new)
       vocab_list = get_vocab_list(vocab_file_new)
       for vocab in vocab_list:
         data.vocab_list.append(vocab)
 
   model_dir = pipeline_config.model_dir
-  pipeline_config.model_dir = f"{data_root_path}/{model_dir}"
+  pipeline_config.model_dir = f'{data_root_path}/{model_dir}'
 
-  train_input_path = f"{data_root_path}/{pipeline_config.train_input_path}"
+  train_input_path = f'{data_root_path}/{pipeline_config.train_input_path}'
   train_input_path_new = get_file_path_list(train_input_path)
   pipeline_config.train_input_path = ','.join(train_input_path_new)
 
-  eval_input_path = f"{data_root_path}/{pipeline_config.eval_input_path}"
+  eval_input_path = f'{data_root_path}/{pipeline_config.eval_input_path}'
   eval_input_path_new = get_file_path_list(eval_input_path)
   pipeline_config.eval_input_path = ','.join(eval_input_path_new)
 
@@ -118,10 +120,15 @@ if __name__ == '__main__':
       help='Path to pipeline config file.')
 
   parser.add_argument(
+      '--pkg_label',
+      type=str,
+      default='aaa194_THA_ios_20250927_20251011(test)',
+      help='Path to pipeline config file.')
+
+  parser.add_argument(
       '--data_root_path',
-      type = str,
-      default= '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data'
-  )
+      type=str,
+      default='/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data')
 
   parser.add_argument(
       '--train_sample_cnt',
@@ -138,7 +145,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--num_epochs',
       type=int,
-      default=10,
+      default=1,
   )
   parser.add_argument(
       '--initial_learning_rate',
@@ -225,6 +232,7 @@ if __name__ == '__main__':
   batch_size = args.batch_size
   num_epochs = args.num_epochs
   initial_learning_rate = args.initial_learning_rate
+  pkg_label = args.pkg_label
 
   if args.gpu is not None:
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
@@ -305,7 +313,6 @@ if __name__ == '__main__':
     else:
 
       change_pipeline_config(pipeline_config)
-
       if args.continue_train:
         pass
       else:
@@ -313,9 +320,9 @@ if __name__ == '__main__':
         print(f'model_dir:{model_dir}')
         os.system(f'rm -rf {model_dir}')
 
-
       config_util.auto_expand_share_feature_configs(pipeline_config)
       _train_and_evaluate_impl(
+          pkg_label,
           pipeline_config,
           args.continue_train,
           args.check_mode,
