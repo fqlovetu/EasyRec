@@ -55,7 +55,40 @@ class TrainDoneListener(_ContinuousEvalListener):
     return not gfile.Exists(self._train_done_file)
 
 
-def train_and_evaluate(estimator, train_spec, eval_spec):
+def send_message(msg, content):
+  url = 'https://open.feishu.cn/open-apis/bot/v2/hook/f08b1f5d-bc50-40a6-be0b-ebe2fda5da3a'
+  print(msg)
+  msg = msg.replace('\n', '\\n')
+  command = """
+       curl '%s' \
+        -H 'Content-Type: application/json' \
+        -d '{
+            "msg_type": "interactive",
+            "card": {
+                "config": {
+                    "wide_screen_mode": true,
+                    "enable_forward": true
+                },
+                "elements": [{
+                    "tag": "div",
+                    "text": {
+                        "content": "%s",
+                        "tag": "lark_md"
+                    }
+                }],
+                "header": {
+                    "title": {
+                            "content": "%s",
+                            "tag": "plain_text"
+                    }
+                }
+            }
+        }'
+        """ % (url, msg, content)
+  os.system(command)
+
+
+def train_and_evaluate(pkg_label, estimator, train_spec, eval_spec):
   _assert_eval_spec(eval_spec)  # fail fast if eval_spec is invalid.
 
   train_done_listener = TrainDoneListener(estimator)
@@ -82,27 +115,53 @@ def train_and_evaluate(estimator, train_spec, eval_spec):
         '(with task id 0).  Given task id {}'.format(config.task_id))
 
   result = executor.run()
+  # ({'auc': 0.52501655, 'loss': 0.029785424, 'loss/loss/custom_loss': 0.029785424, 'loss/loss/total_loss': 0.029785424,
+  #   'global_step': 19}, [None])
+  content = f'PAI-DLC-{pkg_label} 模型训练监控:'
+
+  eval_data = result[0]
+  val_loss = eval_data['loss']
+  val_auc = eval_data['auc']
+  send_message(f'val_loss:{val_loss},val_auc:{val_auc}', content)
 
   # fix for the bug evaluator fails to export in case num_epoch is reached
   # before num_steps is reached or num_steps is set to infinite
-  if estimator_utils.is_evaluator():
-    export_dir_base = os.path.join(
-        compat.as_str_any(estimator.model_dir), compat.as_str_any('export'))
-    for exporter in eval_spec.exporters:
-      if isinstance(exporter, FinalExporter):
-        export_path = os.path.join(
-            compat.as_str_any(export_dir_base),
-            compat.as_str_any(exporter.name))
-        # avoid duplicate export
-        if gfile.IsDirectory(export_path + '/'):
-          continue
-        exporter.export(
-            estimator=estimator,
-            export_path=export_path,
-            checkpoint_path=estimator_utils.latest_checkpoint(
-                estimator.model_dir),
-            eval_result=None,
-            is_the_final_export=True)
+
+  # if estimator_utils.is_evaluator():
+  #   export_dir_base = os.path.join(
+  #       compat.as_str_any(estimator.model_dir), compat.as_str_any('export'))
+  #   for exporter in eval_spec.exporters:
+  #     if isinstance(exporter, FinalExporter):
+  #       export_path = os.path.join(
+  #           compat.as_str_any(export_dir_base),
+  #           compat.as_str_any(exporter.name))
+  #       # avoid duplicate export
+  #       if gfile.IsDirectory(export_path + '/'):
+  #         continue
+  #       exporter.export(
+  #           estimator=estimator,
+  #           export_path=export_path,
+  #           checkpoint_path=estimator_utils.latest_checkpoint(
+  #               estimator.model_dir),
+  #           eval_result=None,
+  #           is_the_final_export=True)
+
+  export_dir_base = os.path.join(
+      compat.as_str_any(estimator.model_dir), compat.as_str_any('export'))
+  for exporter in eval_spec.exporters:
+    if isinstance(exporter, FinalExporter):
+      export_path = os.path.join(
+          compat.as_str_any(export_dir_base), compat.as_str_any(exporter.name))
+      # avoid duplicate export
+      if gfile.IsDirectory(export_path + '/'):
+        continue
+      exporter.export(
+          estimator=estimator,
+          export_path=export_path,
+          checkpoint_path=estimator_utils.latest_checkpoint(
+              estimator.model_dir),
+          eval_result=None,
+          is_the_final_export=True)
 
   if estimator_utils.is_chief():
     with gfile.GFile(train_done_listener.train_done_file, 'w') as fout:
