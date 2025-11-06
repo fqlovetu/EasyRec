@@ -293,7 +293,8 @@ def train_and_evaluate(pipeline_config_path, continue_train=False):
   return pipeline_config
 
 
-def _train_and_evaluate_impl(pipeline_config,
+def _train_and_evaluate_impl(pkg_label,
+                             pipeline_config,
                              continue_train=False,
                              check_mode=False,
                              fit_on_eval=False,
@@ -372,7 +373,8 @@ def _train_and_evaluate_impl(pipeline_config,
     # create eval spec
     eval_spec = _create_eval_export_spec(
         pipeline_config, eval_data, check_mode=check_mode)
-    estimator_train.train_and_evaluate(estimator, train_spec, eval_spec)
+    estimator_train.train_and_evaluate(pkg_label, estimator, train_spec,
+                                       eval_spec)
   logging.info('Train and evaluate finish')
   if fit_on_eval and (not estimator_utils.is_evaluator()):
     tf.reset_default_graph()
