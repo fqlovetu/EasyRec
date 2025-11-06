@@ -9,7 +9,7 @@ easy_rec.egg-info
 # proto
 protoc
 protoc-3.4.0.tar.gz
-#*_pb2.py
+*_pb2.py
 
 # misc
 experiments
