@@ -50,7 +50,7 @@ def parse_requirements(fname='requirements.txt'):
 
 
 setup(
-    name='easy-rec',
+    name='easy-cs-rec-custommodel',
     version=get_version(),
     description='An easy-to-use framework for Recommendation',
     doc=readme(),
