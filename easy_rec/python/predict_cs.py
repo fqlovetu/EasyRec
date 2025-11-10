@@ -12,7 +12,7 @@ from easy_rec.python.inference.csv_predictor import CSVPredictor
 from easy_rec.python.inference.hive_predictor import HivePredictor
 from easy_rec.python.inference.parquet_predictor import ParquetPredictor
 from easy_rec.python.inference.parquet_predictor_v2 import ParquetPredictorV2
-from easy_rec.python.inference.tfrecord_predictor import TFRecordPredictor
+from easy_rec.python.inference.tfrecord_predictor_cs import TFRecordPredictor
 from easy_rec.python.main import predict
 from easy_rec.python.protos.dataset_pb2 import DatasetConfig
 from easy_rec.python.utils import config_util
@@ -55,17 +55,23 @@ tf.app.flags.DEFINE_string(
     '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/custom_model/export',
     help='save model dir')
 tf.app.flags.DEFINE_string(
-    'reserved_cols', 'ALL_COLUMNS',
+    'reserved_cols', 'ifa,ip_max,ua',
+    'columns to keep from input table,  they are separated with ,')
+tf.app.flags.DEFINE_string(
+    'reserved_cols_all', 'ifa,ip_max,osv_max,language,make,model,ua',
     'columns to keep from input table,  they are separated with ,')
 tf.app.flags.DEFINE_string(
     'output_cols', 'ALL_COLUMNS',
     'output columns, such as: score float. multiple columns are separated by ,')
-tf.app.flags.DEFINE_string('output_sep', chr(1),
+tf.app.flags.DEFINE_string('output_sep', '|',
                            'separator of predict result file')
 tf.app.flags.DEFINE_string('selected_cols', None, '')
 tf.app.flags.DEFINE_string('fg_json_path', '', '')
 tf.app.flags.DEFINE_string('ds_vector_recall', '', '')
 tf.app.flags.DEFINE_string('input_type', '', 'data_config.input_type')
+
+tf.app.flags.DEFINE_float('score_filter', 0.363, 'filter ifa')
+
 FLAGS = tf.app.flags.FLAGS
 
 input_class_map = {y: x for x, y in DatasetConfig.InputType.items()}
@@ -160,6 +166,8 @@ def main(argv):
         FLAGS.input_path,
         FLAGS.output_path,
         reserved_cols=FLAGS.reserved_cols,
+        reserved_cols_all=FLAGS.reserved_cols_all,
+        score_filter=FLAGS.score_filter,
         output_cols=FLAGS.output_cols,
         batch_size=FLAGS.batch_size,
         slice_id=task_index,
