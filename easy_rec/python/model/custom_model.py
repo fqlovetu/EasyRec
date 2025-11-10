@@ -1,17 +1,8 @@
 # easy_rec/python/model/custom_model.py
-import os
-import sys
 
-import six
 import tensorflow as tf
 
-from easy_rec.python.builders import loss_builder
-from easy_rec.python.compat import regularizers
-from easy_rec.python.feature_column.feature_column import FeatureColumnParser
 from easy_rec.python.model.easy_rec_model import EasyRecModel
-from easy_rec.python.protos.deepfm_pb2 import DeepFM as DeepFMConfig
-# from easy_rec.python.protos.easy_rec_model_pb2 import LossType
-from easy_rec.python.protos.loss_pb2 import LossType
 
 if tf.__version__ >= '2.0':
   tf = tf.compat.v1
@@ -84,15 +75,6 @@ class CustomModel(EasyRecModel):
                features,
                labels=None,
                is_training=False):
-    """
-        Args:
-          model_config: easy_rec.python.protos.easy_rec_model_pb2.EasyRecModel
-               model_config.custom_model is instance of:
-                     easy_rec.python.protos.easy_rec_model_pb2.CustomModel
-          feature_configs: a collection of easy_rec.python.protos.feature_config.FeatureConfig
-          features: dict of feature tensors, which are described by easy_rec.python.protos.DatasetConfig.input_fields
-          labels: dict of labels tensors, which are described by easy_rec.python.protos.DatasetConfig.label_fields
-        """
     super(CustomModel, self).__init__(model_config, feature_configs, features,
                                       labels, is_training)
     self.drop_out_rate = 0.05
@@ -142,11 +124,11 @@ class CustomModel(EasyRecModel):
     self._multi_head_2_output_end = self._get_seq_feature_reduce(
         self._multi_head_2_output, reduce_type='mean', axis=1, keepdims=False)
 
-    self.deep_input = self._get_features_concat([
+    self._features_list_1 = [
         self._raw_features, self._seq_features_concat,
         self._multi_head_1_output_end, self._multi_head_2_output_end
-    ],
-                                                axis=-1)
+    ]
+    self.deep_input = self._get_features_concat(self._features_list_1, axis=-1)
 
   def _get_seq_features_reduce(self, seq_features, reduce_type, axis: int,
                                keepdims: bool):
@@ -203,7 +185,7 @@ class CustomModel(EasyRecModel):
         dnn_1_4_list, '1:4', prefix='dnn_1_5', branch_num=2)
     dnn_1_concat = tf.concat(dnn_1_5_list, axis=-1, name='dnn_1_concat')
     dnn_2_1 = tf.keras.layers.Dense(
-        units=32, activation='relu', name=f'dnn_layer_2_1')(
+        units=32, activation='relu', name='dnn_layer_2_1')(
             dnn_1_concat)
     if self.drop_out_rate == 0:
       dnn_2_1_dropout = dnn_2_1
@@ -213,7 +195,7 @@ class CustomModel(EasyRecModel):
               dnn_2_1)
 
     dnn_2_2 = tf.keras.layers.Dense(
-        units=16, activation='relu', name=f'dnn_layer_2_2')(
+        units=16, activation='relu', name='dnn_layer_2_2')(
             dnn_2_1_dropout)
     if self.drop_out_rate == 0:
       dnn_2_2_dropout = dnn_2_2
@@ -223,7 +205,7 @@ class CustomModel(EasyRecModel):
               dnn_2_2)
 
     dnn_2_3 = tf.keras.layers.Dense(
-        units=8, activation='relu', name=f'dnn_layer_2_3')(
+        units=8, activation='relu', name='dnn_layer_2_3')(
             dnn_2_2_dropout)
     if self.drop_out_rate == 0:
       dnn_2_3_dropout = dnn_2_3
@@ -270,18 +252,14 @@ class CustomModel(EasyRecModel):
         if j == 0:
           deep_layer = tf.keras.layers.Dense(
               units=int(dnn_info_list[1]),
-              activation='relu'
-              # , kernel_regularizer=tf.keras.regularizers.l1_l2(l1=0.01, l2=0.01)
-              ,
+              activation='relu',
               name=f'dnn_layer_{prefix}_{i}_{j}')(
                   input)
 
         else:
           deep_layer = tf.keras.layers.Dense(
               units=int(dnn_info_list[1]),
-              activation='relu'
-              # , kernel_regularizer=tf.keras.regularizers.l1_l2(l1=0.01, l2=0.01)
-              ,
+              activation='relu',
               name=f'dnn_layer_{prefix}_{i}_{j}')(
                   deep_layer)
       output_list.append(deep_layer)
@@ -297,18 +275,14 @@ class CustomModel(EasyRecModel):
           if j == 0:
             deep_layer = tf.keras.layers.Dense(
                 units=int(dnn_info_list[1]),
-                activation='relu'
-                # , kernel_regularizer=tf.keras.regularizers.l1_l2(l1=0.01, l2=0.01)
-                ,
+                activation='relu',
                 name=f'dnn_layer_{prefix}_{branch}_{i}_{j}')(
                     layer_output_list[i])
 
           else:
             deep_layer = tf.keras.layers.Dense(
                 units=int(dnn_info_list[1]),
-                activation='relu'
-                # , kernel_regularizer=tf.keras.regularizers.l1_l2(l1=0.01, l2=0.01)
-                ,
+                activation='relu',
                 name=f'dnn_layer_{prefix}_{branch}_{i}_{j}')(
                     deep_layer)
         # deep_layer_end = tf.concat([deep_layer,bundle_info_sum],axis=-1)
@@ -319,6 +293,5 @@ class CustomModel(EasyRecModel):
               self.drop_out_rate, noise_shape=None, seed=None)(
                   deep_layer)
         output_list.append(deep_layer_dropout)
-
 
     return output_list
