@@ -34,7 +34,7 @@ tf.app.flags.DEFINE_string(
     'predict data path')
 tf.app.flags.DEFINE_string(
     'output_path',
-    '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/feature_out',
+    '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/output/feature_out',
     'path to save predict result')
 tf.app.flags.DEFINE_integer('batch_size', 1024, help='batch size')
 tf.app.flags.DEFINE_bool('with_header', False,
@@ -52,7 +52,7 @@ tf.app.flags.DEFINE_string('model_dir', None, help='will update the model_dir')
 # predict by saved_model
 tf.app.flags.DEFINE_string(
     'saved_model_dir',
-    '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/custom_model/export',
+    '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/output/custom_model/export',
     help='save model dir')
 tf.app.flags.DEFINE_string(
     'reserved_cols', 'ifa,ip_max,ua',

@@ -81,31 +81,26 @@ def change_pipeline_config(pipeline_config: EasyRecConfig):
     vocab_file = data.vocab_list
     if vocab_file:
       vocab_file_new = get_file_path_list(
-          f'{data_root_path}/{vocab_file.pop()}')[0]
+          f'{data_root_path_input}/{vocab_file.pop()}')[0]
       # print(vocab_file_new)
       vocab_list = get_vocab_list(vocab_file_new)
       for vocab in vocab_list:
         data.vocab_list.append(vocab)
 
-  model_dir = pipeline_config.model_dir
-  pipeline_config.model_dir = f'{data_root_path}/{model_dir}'
-
-  train_input_path = f'{data_root_path}/{pipeline_config.train_input_path}'
+  train_input_path = f'{data_root_path_input}/{pipeline_config.train_input_path}'
   train_input_path_new = get_file_path_list(train_input_path)
   pipeline_config.train_input_path = ','.join(train_input_path_new)
-
-  eval_input_path = f'{data_root_path}/{pipeline_config.eval_input_path}'
+  eval_input_path = f'{data_root_path_input}/{pipeline_config.eval_input_path}'
   eval_input_path_new = get_file_path_list(eval_input_path)
   pipeline_config.eval_input_path = ','.join(eval_input_path_new)
-
+  model_dir = pipeline_config.model_dir
+  pipeline_config.model_dir = f'{data_root_path_output}/{model_dir}'
   pipeline_config.data_config.batch_size = batch_size
   pipeline_config.data_config.num_epochs = num_epochs
-
   pipeline_config.train_config.log_step_count_steps = int(train_sample_cnt /
                                                           batch_size)
   pipeline_config.train_config.save_checkpoints_steps = int(train_sample_cnt /
                                                             batch_size)
-
   pipeline_config.train_config.optimizer_config[
       0].adam_optimizer.learning_rate.exponential_decay_learning_rate.initial_learning_rate = initial_learning_rate
 
@@ -126,9 +121,15 @@ if __name__ == '__main__':
       help='Path to pipeline config file.')
 
   parser.add_argument(
-      '--data_root_path',
+      '--data_root_path_input',
       type=str,
       default='/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data')
+
+  parser.add_argument(
+      '--data_root_path_output',
+      type=str,
+      default='/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/output'
+  )
 
   parser.add_argument(
       '--train_sample_cnt',
@@ -227,7 +228,9 @@ if __name__ == '__main__':
   parser.add_argument('--gpu', type=str, default=None, help='gpu id')
   args, extra_args = parser.parse_known_args()
 
-  data_root_path = args.data_root_path
+  data_root_path_input = args.data_root_path_input
+  data_root_path_output = args.data_root_path_output
+
   train_sample_cnt = args.train_sample_cnt
   batch_size = args.batch_size
   num_epochs = args.num_epochs
