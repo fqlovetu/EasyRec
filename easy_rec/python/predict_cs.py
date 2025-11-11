@@ -155,11 +155,15 @@ def main(argv):
 
     logging.info('input_path = %s, output_path = %s' %
                  (FLAGS.input_path, FLAGS.output_path))
+
     if 'TF_CONFIG' in os.environ:
       tf_config = json.loads(os.environ['TF_CONFIG'])
+      print('******TEST1234_TF_CONFIG存在******')
+      print(tf_config)
       worker_num = len(tf_config['cluster']['worker'])
       task_index = tf_config['task']['index']
     else:
+      print('******TEST1234_TF_CONFIG不存在******')
       worker_num = 1
       task_index = 0
     predictor.predict_impl(
