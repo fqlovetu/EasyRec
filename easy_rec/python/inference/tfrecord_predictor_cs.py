@@ -236,21 +236,21 @@ class TFRecordPredictor(Predictor):
                         score_filter, len_data, start_flag):
 
     out_put_str = ''
+    cnt = 0
     for i in range(len_data):
       score = outputs[i]
       if score >= score_filter:
         for j in range(len(reserved_cols_all)):
           c = reserved_cols_all[j]
           if j == 0:
-            if start_flag == 0:
+            if start_flag == 0 and cnt == 0:
               out_put_str += f'{output_vals[c][i]}{self._output_sep}'
             else:
               out_put_str += f'\n{output_vals[c][i]}{self._output_sep}'
           else:
             out_put_str += f'{output_vals[c][i]}{self._output_sep}'
         out_put_str += f'{round(score, 8)}'
-      else:
-        continue
+      cnt += 1
     return out_put_str
 
   @property
