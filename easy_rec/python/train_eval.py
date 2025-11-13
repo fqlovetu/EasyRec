@@ -90,17 +90,22 @@ def change_pipeline_config(pipeline_config: EasyRecConfig):
   train_input_path = f'{data_root_path_input}/{pipeline_config.train_input_path}'
   train_input_path_new = get_file_path_list(train_input_path)
   pipeline_config.train_input_path = ','.join(train_input_path_new)
+
   eval_input_path = f'{data_root_path_input}/{pipeline_config.eval_input_path}'
   eval_input_path_new = get_file_path_list(eval_input_path)
   pipeline_config.eval_input_path = ','.join(eval_input_path_new)
+
   model_dir = pipeline_config.model_dir
   pipeline_config.model_dir = f'{data_root_path_output}/{model_dir}'
+
   pipeline_config.data_config.batch_size = batch_size
   pipeline_config.data_config.num_epochs = num_epochs
+
   pipeline_config.train_config.log_step_count_steps = int(train_sample_cnt /
                                                           batch_size)
   pipeline_config.train_config.save_checkpoints_steps = int(train_sample_cnt /
                                                             batch_size)
+
   pipeline_config.train_config.optimizer_config[
       0].adam_optimizer.learning_rate.exponential_decay_learning_rate.initial_learning_rate = initial_learning_rate
 
