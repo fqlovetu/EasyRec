@@ -55,7 +55,7 @@ tf.app.flags.DEFINE_string(
     '/Users/chensheng/PycharmProjects/EasyRec/data/test/cs_data/output/custom_model/export',
     help='save model dir')
 tf.app.flags.DEFINE_string(
-    'reserved_cols', 'ifa,ip_max,ua',
+    'reserved_cols', 'ifa,ip_max',
     'columns to keep from input table,  they are separated with ,')
 tf.app.flags.DEFINE_string(
     'reserved_cols_all', 'ifa,ip_max,osv_max,language,make,model,ua',
@@ -70,7 +70,7 @@ tf.app.flags.DEFINE_string('fg_json_path', '', '')
 tf.app.flags.DEFINE_string('ds_vector_recall', '', '')
 tf.app.flags.DEFINE_string('input_type', '', 'data_config.input_type')
 
-tf.app.flags.DEFINE_float('score_filter', 0.363, 'filter ifa')
+tf.app.flags.DEFINE_float('score_filter', 0.0, 'filter ifa')
 
 FLAGS = tf.app.flags.FLAGS
 

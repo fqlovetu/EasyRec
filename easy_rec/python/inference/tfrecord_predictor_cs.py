@@ -316,7 +316,7 @@ class TFRecordPredictor(Predictor):
           input_vals, output_vals = _parse_value(all_vals)
           outputs = self._predictor_impl.predict(input_vals, self._output_cols)
           for x in self._output_cols:
-            if outputs[x].dtype == np.object__:
+            if outputs[x].dtype == np.object_:
               outputs[x] = [val.decode('utf-8') for val in outputs[x]]
             elif len(outputs[x].shape) == 2 and outputs[x].shape[1] == 1:
               # automatic flatten only one element array
