@@ -1,0 +1,13 @@
+eas_prediction == 0.24; python_version < '3.0'
+eas_prediction; python_version >= '3.0'
+future
+matplotlib
+numpy <= 1.23
+oss2
+pandas
+psutil
+pyarrow
+pyodps
+PyYAML
+scikit-learn
+xlrd >= 0.9.0
