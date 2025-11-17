@@ -316,7 +316,7 @@ class TFRecordPredictor(Predictor):
           input_vals, output_vals = _parse_value(all_vals)
           outputs = self._predictor_impl.predict(input_vals, self._output_cols)
           for x in self._output_cols:
-            if outputs[x].dtype == np.object:
+            if outputs[x].dtype == np.object__:
               outputs[x] = [val.decode('utf-8') for val in outputs[x]]
             elif len(outputs[x].shape) == 2 and outputs[x].shape[1] == 1:
               # automatic flatten only one element array
@@ -336,7 +336,7 @@ class TFRecordPredictor(Predictor):
           len_data = len(output_vals['ifa'])
           reserved_cols_all_list = reserved_cols_all.split(',')
           for c in reserved_cols_all_list:
-            if c in output_vals and output_vals[c].dtype == np.object:
+            if c in output_vals and output_vals[c].dtype == np.object_:
               output_vals[c] = [
                   val[0].decode('utf-8',
                                 errors='ignore').replace('|', '').replace(

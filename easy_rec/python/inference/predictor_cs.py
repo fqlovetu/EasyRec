@@ -522,7 +522,7 @@ class Predictor(PredictorInterface):
           input_vals = _parse_value(all_vals)
           outputs = self._predictor_impl.predict(input_vals, self._output_cols)
           for x in self._output_cols:
-            if outputs[x].dtype == np.object:
+            if outputs[x].dtype == np.object_:
               outputs[x] = [val.decode('utf-8') for val in outputs[x]]
             elif len(outputs[x].shape) == 2 and outputs[x].shape[1] == 1:
               # automatic flatten only one element array
@@ -533,7 +533,7 @@ class Predictor(PredictorInterface):
                   for val in outputs[x]
               ]
           for k in self._reserved_cols:
-            if k in all_vals and all_vals[k].dtype == np.object:
+            if k in all_vals and all_vals[k].dtype == np.object_:
               all_vals[k] = [
                   val.decode('utf-8', errors='ignore') for val in all_vals[k]
               ]
