@@ -101,13 +101,19 @@ def change_pipeline_config(pipeline_config: EasyRecConfig):
   pipeline_config.data_config.batch_size = batch_size
   pipeline_config.data_config.num_epochs = num_epochs
 
-  pipeline_config.train_config.log_step_count_steps = int(train_sample_cnt /
-                                                          batch_size)
-  pipeline_config.train_config.save_checkpoints_steps = int(train_sample_cnt /
-                                                            batch_size)
+  epoch_step = int(train_sample_cnt / batch_size)
+
+  pipeline_config.train_config.log_step_count_steps = epoch_step
+  pipeline_config.train_config.save_checkpoints_steps = epoch_step
 
   pipeline_config.train_config.optimizer_config[
       0].adam_optimizer.learning_rate.exponential_decay_learning_rate.initial_learning_rate = initial_learning_rate
+
+  pipeline_config.train_config.optimizer_config[
+      0].adam_optimizer.learning_rate.exponential_decay_learning_rate.decay_steps = decay_step_epoch * epoch_step
+
+  pipeline_config.train_config.optimizer_config[
+      0].adam_optimizer.learning_rate.exponential_decay_learning_rate.decay_factor = decay_factor
 
 
 if __name__ == '__main__':
@@ -158,6 +164,10 @@ if __name__ == '__main__':
       type=float,
       default=0.001,
   )
+
+  parser.add_argument('--decay_step_epoch', type=int, default=10)
+
+  parser.add_argument('--decay_factor', type=float, default=1.0)
 
   parser.add_argument(
       '--continue_train',
@@ -240,6 +250,8 @@ if __name__ == '__main__':
   batch_size = args.batch_size
   num_epochs = args.num_epochs
   initial_learning_rate = args.initial_learning_rate
+  decay_step_epoch = args.decay_step_epoch
+  decay_factor = args.decay_factor
   pkg_label = args.pkg_label
 
   if args.gpu is not None:

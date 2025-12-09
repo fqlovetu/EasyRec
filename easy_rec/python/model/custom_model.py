@@ -89,13 +89,13 @@ class CustomModel(EasyRecModel):
 
     self._seq_features_concat = self._get_features_concat(
         self._get_seq_features_reduce(
-            self._seq_features, reduce_type='mean', axis=1, keepdims=False),
+            self._seq_features, reduce_type='sum', axis=1, keepdims=False),
         axis=-1)
 
     self._multi_head_1_features_concat = self._get_features_concat(
         self._get_seq_features_reduce(
             self._multi_head_1_features,
-            reduce_type='mean',
+            reduce_type='max',
             axis=1,
             keepdims=True),
         axis=1)
@@ -103,7 +103,7 @@ class CustomModel(EasyRecModel):
     self._multi_head_2_features_concat = self._get_features_concat(
         self._get_seq_features_reduce(
             self._multi_head_2_features,
-            reduce_type='mean',
+            reduce_type='max',
             axis=1,
             keepdims=True),
         axis=1)
