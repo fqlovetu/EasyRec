@@ -176,8 +176,7 @@ def main(argv):
         batch_size=FLAGS.batch_size,
         slice_id=task_index,
         slice_num=worker_num)
-    print('人群包推理已完成')
-    os.system(f"echo '' > {FLAGS.output_path}/_SUCCESS")
+
   else:
     logging.info('Predict by checkpoint_path.')
     assert FLAGS.model_dir or FLAGS.pipeline_config_path, 'At least one of model_dir and pipeline_config_path exists.'
